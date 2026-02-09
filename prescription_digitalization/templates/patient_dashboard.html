@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .upload-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .upload-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+    }
+    
+    .file-input-wrapper input[type=file] {
+        position: absolute;
+        left: -9999px;
+    }
+    
+    .file-input-label {
+        background: white;
+        color: #667eea;
+        padding: 12px 30px;
+        border-radius: 5px;
+        cursor: pointer;
+        display: inline-block;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .file-input-label:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    }
+    
+    .upload-btn {
+        background: #28a745;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .upload-btn:hover {
+        background: #218838;
+        transform: translateY(-2px);
+    }
+    
+    .prescriptions-list {
+        display: grid;
+        gap: 20px;
+    }
+    
+    .prescription-card {
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 20px;
+        transition: all 0.3s;
+    }
+    
+    .prescription-card:hover {
+        border-color: #667eea;
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.1);
+    }
+    
+    .prescription-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .medicine-list {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-top: 15px;
+    }
+    
+    .medicine-item {
+        background: white;
+        padding: 12px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        border-left: 4px solid #667eea;
+    }
+    
+    .medicine-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .medicine-name {
+        font-weight: 600;
+        color: #667eea;
+        font-size: 18px;
+        margin-bottom: 8px;
+    }
+    
+    .medicine-details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        font-size: 14px;
+        color: #666;
+    }
+    
+    .detail-item {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .detail-label {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .view-image-btn {
+        background: #667eea;
+        color: white;
+        padding: 8px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .view-image-btn:hover {
+        background: #5568d3;
+    }
+    
+    .delete-btn {
+        background: #667eea;
+        color: white;
+        padding: 8px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s;
+    }
+    
+    .delete-btn:hover {
+        background: #5568d3;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h2>📋 My Prescriptions</h2>
+</div>
+
+<div class="upload-section">
+    <h3>📤 Upload New Prescription</h3>
+    <form action="{{ url_for('upload_prescription') }}" method="POST" enctype="multipart/form-data" class="upload-form">
+        <div class="file-input-wrapper">
+            <label for="file-upload" class="file-input-label">
+                📁 Choose Prescription Image
+            </label>
+            <input id="file-upload" type="file" name="prescription" accept="image/*,.pdf" required>
+        </div>
+        
+        <div>
+            <span id="file-name" style="color: white; font-style: italic;">No file chosen</span>
+        </div>
+        
+        <button type="submit" class="upload-btn">Upload & Process</button>
+    </form>
+</div>
+
+<div class="prescriptions-list">
+    <h3>📚 Your Prescription History</h3>
+    
+    {% if prescriptions %}
+        {% for prescription in prescriptions %}
+        <div class="prescription-card">
+            <div class="prescription-header">
+                <div>
+                    <strong>📅 Date:</strong> {{ prescription.upload_date.strftime('%d %b %Y, %I:%M %p') }}
+                </div>
+                <div class="action-buttons">
+                    <a href="{{ url_for('view_prescription_image', prescription_id=prescription.prescription_id) }}" 
+                       class="view-image-btn" target="_blank">View Image</a>
+                    
+                    <form method="POST" action="{{ url_for('delete_prescription', prescription_id=prescription.prescription_id) }}" 
+                          onsubmit="return confirm('Are you sure you want to delete this prescription? This cannot be undone!');" 
+                          style="margin: 0;">
+                        <button type="submit" class="delete-btn">Delete</button>
+                    </form>
+                </div>
+            </div>
+            
+            {% if prescription.medicines %}
+            <div class="medicine-list">
+                <strong>💊 Medications:</strong>
+                {% for medicine in prescription.medicines %}
+                <div class="medicine-item">
+                    <div class="medicine-name">{{ medicine.medicine_name }}</div>
+                    <div class="medicine-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Dosage:</span>
+                            <span>{{ medicine.dosage }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Frequency:</span>
+                            <span>{{ medicine.frequency }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Duration:</span>
+                            <span>{{ medicine.duration }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color: #999; font-style: italic;">No medicines extracted from this prescription.</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="card">
+            <p style="text-align: center; color: #999;">No prescriptions uploaded yet. Upload your first prescription above!</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    document.getElementById('file-upload').addEventListener('change', function(e) {
+        const fileName = e.target.files[0] ? e.target.files[0].name : 'No file chosen';
+        document.getElementById('file-name').textContent = fileName;
+    });
+</script>
+{% endblock %}

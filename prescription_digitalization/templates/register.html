@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Prescription System{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .register-container {
+        max-width: 450px;
+        width: 100%;
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    
+    .register-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .register-header h2 {
+        color: #667eea;
+        font-size: 28px;
+        margin-bottom: 10px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 500;
+    }
+    
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: all 0.3s;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+    
+    .register-btn {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .register-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .login-link {
+        text-align: center;
+        margin-top: 20px;
+        color: #666;
+    }
+    
+    .login-link a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+    
+    .role-info {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: #666;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="register-header">
+        <h2>🏥 Create Account</h2>
+        <p>Prescription Digitalization System</p>
+    </div>
+    
+    <div class="role-info">
+        <strong>👤 Patient:</strong> Upload and view your prescriptions<br>
+        <strong>🏥 Hospital Staff:</strong> View all prescriptions and analytics
+    </div>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <form action="{{ url_for('register') }}" method="POST">
+        <div class="form-group">
+            <label for="full_name">Full Name *</label>
+            <input type="text" id="full_name" name="full_name" required placeholder="Enter your full name">
+        </div>
+        
+        <div class="form-group">
+            <label for="username">Username *</label>
+            <input type="text" id="username" name="username" required placeholder="Choose a username">
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password *</label>
+            <input type="password" id="password" name="password" required placeholder="Choose a strong password" minlength="6">
+        </div>
+        
+        <div class="form-group">
+            <label for="confirm_password">Confirm Password *</label>
+            <input type="password" id="confirm_password" name="confirm_password" required placeholder="Re-enter your password" minlength="6">
+        </div>
+        
+        <div class="form-group">
+            <label for="role">I am a *</label>
+            <select id="role" name="role" required>
+                <option value="">-- Select Role --</option>
+                <option value="patient">Patient</option>
+                <option value="staff">Hospital Staff</option>
+            </select>
+        </div>
+        
+        <button type="submit" class="register-btn">Create Account</button>
+    </form>
+    
+    <div class="login-link">
+        Already have an account? <a href="{{ url_for('index') }}">Sign In</a>
+    </div>
+</div>
+{% endblock %}
